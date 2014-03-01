@@ -1,4 +1,5 @@
 <config>
   <logLocation>c:\boiler\boiler.log</logLocation>
   <database>host='localhost' dbname='boiler' user='postgres' password='tuppence'</database>
+  <sessionDir>c:\boiler\sessions\</sessionDir>
 </config>

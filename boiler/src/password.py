@@ -25,7 +25,7 @@ def check_password(password, userid):
     if dbpassword is not None:
         test = hash_password(password, dbsalt)
         print(test)
-        if test == dbpassword
+        if test == dbpassword:
             return True
         else: 
             return False
