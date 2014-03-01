@@ -1,0 +1,4 @@
+<config>
+  <logLocation>c:\boiler\boiler.log</logLocation>
+  <database>host='localhost' dbname='boiler' user='postgres' password='tuppence'</database>
+</config>
