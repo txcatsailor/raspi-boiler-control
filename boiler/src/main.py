@@ -4,21 +4,20 @@ import hashlib
 import uuid
 from password import check_password
 from get_props import prop
+import session
 
-def check_session(session):
-    return True
 
 @route('/')
-def get_details():
+def login():
     pysessionid = sessionid()
-    response.set_cookie('pysessionid', pysessionid, secret='Rs2p5YzYITYGnHvyr9Hx', httponly=True)
+    response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret')[0], httponly=True)
     return template('login')
 
 @route('/main', method='POST')
 def main():
 
-    session = request.get_cookie('pysessionid')
-    if check_session(session) is True:
+    rqstSession = request.get_cookie('pysessionid')
+    if rqstSession(session) is True:
         username = request.forms.get('username')
         password = request.forms.get('password')
         return template('main')

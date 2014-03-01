@@ -2,4 +2,5 @@
   <logLocation>c:\boiler\boiler.log</logLocation>
   <database>host='localhost' dbname='boiler' user='postgres' password='tuppence'</database>
   <sessionDir>c:\boiler\sessions\</sessionDir>
+  <cookieSecret>kjdsh8678dfs65f7s5df76f7v65dsu78</cookieSecret>
 </config>
