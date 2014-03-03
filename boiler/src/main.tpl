@@ -8,7 +8,7 @@
 			<button type="submit">New User</button>
 		</form>
 		<br>
-		<form method="post" action="/setschedule">
+		<form method="post" action="/getschedule">
 			<button type="submit">Set Schedule</button>
 		</form>		
 	</body>
