@@ -13,7 +13,7 @@ def get_password(userid):
             """
     cursor.execute(sql, {'userid':userid})
     row = cursor.fetchone()
-    if row != []:
+    if row is not None:
         dbpassword = row[0]
         dbsalt = row[1]
         return dbpassword, dbsalt
