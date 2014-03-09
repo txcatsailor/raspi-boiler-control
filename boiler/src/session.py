@@ -7,8 +7,9 @@ import hashlib
 def set_session(sessionid):
     sessionDir = prop('sessionDir')[0]
     file = '%s%s' % (sessionDir, sessionid)
-    open(file, 'a').close()
-
+    f=open(file, 'a')
+    f.close()
+    
 def check_session(sessionid):
     sessionDir = prop('sessionDir')[0]
     d = os.listdir(sessionDir)
@@ -27,7 +28,8 @@ def check_session(sessionid):
         sessions = os.listdir(sessionDir)
         if sessionid in sessions:
                 file = '%s%s' % (sessionDir, sessionid)
-                open(file, 'w').close
+                f=open(file, 'w')
+                f.close()
                 return True
     except:
             return False

@@ -7,9 +7,10 @@
   %for col in row:
     <td>{{col}}</td>
   %end
-  <td><a href="/edit/{{id}}"> Edit</a></td>
+  <td><a href="/edit/{{id_shed}}"> Edit</a></td>
   </tr>
 %end
 </table>
-<p>Create <a href="/new">New</a> item</p>
-<p>Show <a href="/done">Done Items</a></p>
+<form method="post" action="/newschedule">
+	<button type="submit">New</button>
+</form>		
