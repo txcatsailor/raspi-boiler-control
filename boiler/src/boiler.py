@@ -3,13 +3,11 @@ import datetime
 from datetime import timedelta
 import logging
 from get_props import prop
-from check_override import check_override
+from override import check_override
+from switch import switch_boiler
 
-def switch_boiler(state):
-    return True
 
 def get_schedule():
-    current_state = 'ON'
     
     logFile = prop('logLocation')
 
@@ -70,7 +68,7 @@ def get_schedule():
     curr_state = cursor.fetchone()
     
     if shed_state !=  curr_state:
-        override = check_override(conn_string, id_shed)
+        override = check_override(id_shed)
         if override is False:
             switch_boiler(shed_state)
 
