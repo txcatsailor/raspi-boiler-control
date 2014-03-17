@@ -5,6 +5,7 @@ from get_props import prop
 from session import get_sessionid, set_session, check_session
 import psycopg2
 from override import set_override
+from password import hash_password
 
 @route('/')
 def login():
@@ -113,6 +114,37 @@ def new_schedule():
         response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret')[0], Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
         redirect('/login')
 
+@route('/newuser', method='any')
+def new_user():
+    rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret')[0])
+    if check_session(rqstSession) is True:
+        if request.forms.get('save','').strip():
+            userid = request.forms.get('userid', '').strip()
+            password = request.forms.get('password','').strip()
+            confpassword = request.forms.get('confpassword','').strip()
+            salt = '0'
+            if password is not '' and password == confpassword and userid is not '':
+                salt, hashed_password = hash_password(userid, salt)
+            
+                conn_string = prop('database')[0]
+                conn = psycopg2.connect(conn_string)
+                cursor = conn.cursor()
+            
+                sql =   """
+                        insert into users (id_usrr, userid, password, salt) values (nextval('users_id_usrr_seq'), %(userid)s, %(password)s, %(salt)s)
+                        """
+                cursor.execute(sql, {'userid':userid, 'password':hashed_password, 'salt':salt})
+                conn.commit()
+                cursor.close()
+    
+            else:
+                return template('newuser')
+        else:
+            return template('newuser')
+    else:
+        pysessionid = ''
+        response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret')[0], Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
+        redirect('/login') 
 
 @error(404)
 def error404(error):

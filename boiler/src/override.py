@@ -74,21 +74,23 @@ def set_override():
     id_shed = shed_row[0]
     shed_state = shed_row[3]
     
-    if check_override(id_shed):
-        state = shed_state
+    if check_override(id_shed) is True:
+        cursor.execute('delete from override')
+        conn.commit()
+
     else:
         if shed_state == 'ON':
             state = 'OFF'
         else:
             state = 'ON'         
     
-    cursor.execute('delete from override')
-    conn.commit()
-    
-    sql =   """
-            insert into override (id_over, id_shed, starttime, state) values (nextval('override_id_over_seq'), %(id_shed)s, %(time)s, %(state)s)"""
-    cursor.execute(sql, {'id_shed':id_shed, 'time':time, 'state':state})
-    conn.commit()
+        cursor.execute('delete from override')
+        conn.commit()
+        
+        sql =   """
+                insert into override (id_over, id_shed, starttime, state) values (nextval('override_id_over_seq'), %(id_shed)s, %(time)s, %(state)s)"""
+        cursor.execute(sql, {'id_shed':id_shed, 'time':time, 'state':state})
+        conn.commit()
     cursor.close()
     
 
