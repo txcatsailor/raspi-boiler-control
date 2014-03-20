@@ -1,0 +1,24 @@
+TODO now:
+
+user name - make uppercase in db and convert user input to uppercase before compare
+
+regex to remove non alpha and numeric chars from all user input - validate function?
+
+try-except around things
+
+Add logging everywhere
+
+templates for schedules
+
+Target temperature set and check
+
+GPIO pin in config not hard coded
+
+log temps from all 3 sensors in db
+
+future:
+improve front end - ajax 
+
+remeber me fucntion
+
+calc warmup times
