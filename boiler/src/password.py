@@ -4,6 +4,7 @@ import uuid
 from get_props import prop
 
 def get_password(userid):
+    userid = userid.upper()
     conn_string = prop('database')[0]
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
@@ -21,6 +22,7 @@ def get_password(userid):
         return None, None
     
 def check_password(password, userid):
+    userid = userid.upper()
     dbpassword, dbsalt = get_password(userid)
     if dbpassword is not None:
         test = hash_password(password, dbsalt)
