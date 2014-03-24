@@ -1,41 +1,35 @@
 import psycopg2
 from get_props import prop
-import datetime
 import logging
-import os
 
 def check_temp():
     logging.basicConfig(level=logging.DEBUG)
-#     try: 
-#         f=open('/sys/bus/w1/devices/28-0000058cd8ae/w1_slave', 'r')
-#         for l in f:
-#                 if 't=' in l:
-#                         roomTemp=(float(l.split('=',1)[1].strip().replace('\n', '')))/1000
-#         f.close()
-#     except Exception as e:
-#         logging.debug(e)
-#     try:    
-#         f=open('/sys/bus/w1/devices/28-0000058e3500/w1_slave', 'r')
-#         for l in f:
-#                 if 't=' in l:
-#                         radTemp=(float(l.split('=',1)[1].strip().replace('\n', '')))/1000
-#         f.close()
-#     except Exception as e:
-#         logging.debug(e)
-#     
-#     try:
-#         f=open('/sys/bus/w1/devices/28-0000058e2b9c/w1_slave', 'r')
-#         for l in f:
-#                 if 't=' in l:
-#                         outsideTemp=(float(l.split('=',1)[1].strip().replace('\n', '')))/1000
-#         f.close()
-#     except Exception as e:
-#         logging.debug(e)
-#         
-    
-    roomTemp = 28.99
-    radTemp = 48
-    outsideTemp = 10
+    try: 
+        f=open('/sys/bus/w1/devices/28-0000058cd8ae/w1_slave', 'r')
+        for l in f:
+                if 't=' in l:
+                        roomTemp=(float(l.split('=',1)[1].strip().replace('\n', '')))/1000
+        f.close()
+    except Exception as e:
+        logging.debug(e)
+    try:    
+        f=open('/sys/bus/w1/devices/28-0000058e3500/w1_slave', 'r')
+        for l in f:
+                if 't=' in l:
+                        radTemp=(float(l.split('=',1)[1].strip().replace('\n', '')))/1000
+        f.close()
+    except Exception as e:
+        logging.debug(e)
+     
+    try:
+        f=open('/sys/bus/w1/devices/28-0000058e2b9c/w1_slave', 'r')
+        for l in f:
+                if 't=' in l:
+                        outsideTemp=(float(l.split('=',1)[1].strip().replace('\n', '')))/1000
+        f.close()
+    except Exception as e:
+        logging.debug(e)
+         
     
     logging.debug('Room Temp: %s, Radiator Temp: %s, Outside Temp: %s' % (roomTemp, radTemp, outsideTemp))
     

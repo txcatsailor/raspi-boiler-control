@@ -5,7 +5,7 @@ import logging
 from get_props import prop
 from override import check_override
 from switch import switch_boiler
-
+from check_temp import check_temp
 
 def get_schedule():
     
@@ -28,48 +28,60 @@ def get_schedule():
         logging.debug("failed to connect to database -> %s" (e))
     
 
-    
-    #get current time and day of week
-    day = datetime.date.today()
-    time = datetime.datetime.now().time()
-    dayOfWeek = datetime.date.strftime(day, '%A')
-    
-    logging.debug(dayOfWeek)
-    
-    #get schedule rows from database
-    sql = """
-          select id_shed, day, time, state from schedule where upper(day) = upper(%(day)s) and time <= %(curr_time)s order by time desc
-          """
-            
-    cursor.execute(sql, {'day':dayOfWeek, 'curr_time':time})
-    shed_row = cursor.fetchone()
-    shed_row_str = str(shed_row)
-    logging.debug('current schedule row = %s' % shed_row_str)
-    
-    while shed_row is None:
-        pre_day = day-timedelta(days=1) 
-        dayOfWeek = datetime.date.strftime(pre_day, '%A')
-                    
+    try:
+        #get current time and day of week
+        day = datetime.date.today()
+        time = datetime.datetime.now().time()
+        dayOfWeek = datetime.date.strftime(day, '%A')
+        
+        logging.debug(dayOfWeek)
+        
+        #get schedule rows from database
+        sql = """
+              select id_shed, day, time, state from schedule where upper(day) = upper(%(day)s) and time <= %(curr_time)s order by time desc
+              """
+                
         cursor.execute(sql, {'day':dayOfWeek, 'curr_time':time})
         shed_row = cursor.fetchone()
         shed_row_str = str(shed_row)
         logging.debug('current schedule row = %s' % shed_row_str)
+        
+        while shed_row is None:
+            pre_day = day-timedelta(days=1) 
+            dayOfWeek = datetime.date.strftime(pre_day, '%A')
+                        
+            cursor.execute(sql, {'day':dayOfWeek, 'curr_time':time})
+            shed_row = cursor.fetchone()
+            shed_row_str = str(shed_row)
+            logging.debug('current schedule row = %s' % shed_row_str)
+        
+        id_shed = shed_row[0]
+        shed_day = shed_row[1]
+        shed_time = shed_row[2]
+        shed_state = shed_row[3]
+        
+    except Exception as e:
+        logging.debug(e)
     
-    id_shed = shed_row[0]
-    shed_day = shed_row[1]
-    shed_time = shed_row[2]
-    shed_state = shed_row[3]
-    
-    sql = """
-          select state from current_state
-          """
-    cursor.execute(sql)
-    
-    curr_state = cursor.fetchone()
-    
-    if shed_state !=  curr_state:
-        override = check_override(id_shed)
-        if override is False:
-            switch_boiler(shed_state)
-
+    try:
+        sql = """
+              select state from current_state
+              """
+        cursor.execute(sql)
+        
+        curr_state = cursor.fetchone()
+        
+        if curr_state == 'ON':
+            if check_temp() == 'low':
+                switch_on = True
+            else:
+                switch_on = False
+        
+        if shed_state !=  curr_state:
+            override = check_override(id_shed)
+            if override is False:
+                switch_boiler(shed_state)
+    except Exception as e:
+        logging.debug(e)
+        
 get_schedule()
