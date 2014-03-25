@@ -70,17 +70,43 @@ def get_schedule():
         cursor.execute(sql)
         
         curr_state = cursor.fetchone()
+    except Exception as e:
+        logging.debug(e)
+    
+    try:
+        temp = check_temp()
+        logging.debug('temp is: %s' % temp)
+        override = check_override(id_shed)
         
-        if curr_state == 'ON':
-            if check_temp() == 'low':
-                switch_on = True
-            else:
-                switch_on = False
+        #ON    FALSE    low    on
+        #off    TRUE    low    on
         
-        if shed_state !=  curr_state:
-            override = check_override(id_shed)
-            if override is False:
-                switch_boiler(shed_state)
+        if shed_state == 'ON' and override is False and temp == 'LOW' and curr_state == 'OFF':
+            switch_boiler('ON')        
+        elif shed_state == 'OFF' and override is True and temp == 'LOW' and curr_state == 'OFF':
+            switch_boiler('ON')        
+        else:
+            switch_boiler('OFF')
+        
+#         
+#         if shed_state !=  curr_state and override == False: 
+#             if shed_state == 'OFF':
+#                 switch_boiler('OFF')
+#             if shed_state == 'ON':
+#                 if temp == 'LOW':
+#                     switch_boiler('ON')
+#         
+#         if override is True and shed_state == 'OFF' and curr_state == 'OFF':
+#             if temp == 'LOW':
+#                 switch_boiler('ON')
+#         
+#         if override is False and shed_state == 'ON' and curr_state == 'OFF':
+#         
+#         if curr_state == 'ON' and temp == 'HIGH':
+#             switch_boiler('OFF')
+#         elif curr_state == 'ON' and temp == 'LOW':
+            
+        
     except Exception as e:
         logging.debug(e)
         
