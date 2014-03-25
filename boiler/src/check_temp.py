@@ -58,11 +58,11 @@ def check_temp():
             logging.debug('temp within range')
             return True
         elif roomTemp >= upper:
-            logging.debug('high')
-            return 'high'
+            logging.debug('HIGH')
+            return 'HIGH'
         elif roomTemp <= lower:
-            logging.debug('low')
-            return 'low'
+            logging.debug('LOW')
+            return 'LOW'
            
     except Exception as e:
         logging.debug(e)
