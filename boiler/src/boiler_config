@@ -1,0 +1,8 @@
+[DEFAULT]
+
+logLocation = c:\boiler\boiler.log
+database = host='localhost' dbname='boiler' user='postgres' password='tuppence'
+sessionDir = c:\boiler\sessions\
+cookieSecret = kjdsh8678dfs65f7s5df76f7v65dsu78
+gpio = 15
+tolerance = 2

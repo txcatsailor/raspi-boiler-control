@@ -41,9 +41,9 @@ def main():
 @route('/getschedule', method='any')
 def get_schedule():
     try:
-        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret')[0])
+        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
         if check_session(rqstSession) is True:
-            conn_string = prop('database')[0]
+            conn_string = prop('database')
             conn = psycopg2.connect(conn_string)
             cursor = conn.cursor()
             sql =   """
@@ -56,7 +56,7 @@ def get_schedule():
             return template('sched_table', rows=result)
         else:
             pysessionid = ''
-            response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret')[0], Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
+            response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
             redirect('/login')
     except Exception as e:
         logging.debug(e)
