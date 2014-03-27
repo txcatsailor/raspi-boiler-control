@@ -1,10 +1,20 @@
-from lxml import etree
+#from lxml import etree
 
-def prop(tag): 
-    xml = etree.parse('boiler_props.xml').getroot()
+# def prop(tag): 
+#     xml = etree.parse('boiler_props.xml').getroot()
+#     
+#     path = '/config/'+tag+'/text()'
+#     
+#     text = xml.xpath(path)
+#     
+#     return text
+
+import configparser
+
+def prop(tag):
+    config = configparser.ConfigParser()
+    config.read('boiler_config')
     
-    path = '/config/'+tag+'/text()'
+    con = config['DEFAULT']
     
-    text = xml.xpath(path)
-    
-    return text
+    return con[tag]
