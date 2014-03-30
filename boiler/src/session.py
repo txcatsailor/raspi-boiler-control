@@ -5,13 +5,13 @@ from get_props import prop
 import hashlib
 
 def set_session(sessionid):
-    sessionDir = prop('sessionDir')[0]
+    sessionDir = prop('sessionDir')
     file = '%s%s' % (sessionDir, sessionid)
     f=open(file, 'a')
     f.close()
     
 def check_session(sessionid):
-    sessionDir = prop('sessionDir')[0]
+    sessionDir = prop('sessionDir')
     d = os.listdir(sessionDir)
     try:
         for f in d: 

@@ -5,7 +5,7 @@ from get_props import prop
 
 def get_password(userid):
     userid = userid.upper()
-    conn_string = prop('database')[0]
+    conn_string = prop('database')
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     

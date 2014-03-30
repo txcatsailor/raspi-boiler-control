@@ -8,34 +8,38 @@ from override import set_override
 from password import hash_password
 import logging 
 
-logFile = prop('logLocation')
-
-#logging.basicConfig(format='%(asctime)s: %(message)s ',filename=logFile[0], filemode='a', level=logging.DEBUG)
-logging.basicConfig(level=logging.DEBUG)
+logtype = prop('logtype')
+if logtype == 'file':
+    logFile = prop('loglocation')
+    logging.basicConfig(format='%(asctime)s: %(message)s ',filename=logFile, filemode='a', level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.DEBUG)
 
 @route('/')
 def login():
     pysessionid = get_sessionid()
-    response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret')[0], httponly=True)
+    response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), httponly=True)
     return template('login')
 
 @route('/main', method='POST')
 def main():
     try:
-        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret')[0])
+        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
         username = request.forms.get('username')
         password = request.forms.get('password')
-        if check_password(password, username) is True:
-            set_session(rqstSession)            
-            return template('main')
+        if request.forms.get('override','').strip() is '':
+            if check_password(password, username) is True:
+                set_session(rqstSession)            
+                return template('main')
         elif check_session(rqstSession) is True:
             if request.forms.get('override','').strip():
+                logging.debug('override')
                 set_override()
                 return template('main')            
-        else:
-            return template('login')
+            else:
+                return template('login')
     except Exception as e:
-        logging.debug(e)
+        logging.debug('exception in main: %s' % e)
         return '<p>Error</p>'
 
 @route('/getschedule', method='any')
@@ -67,14 +71,14 @@ def get_schedule():
 @route('/edit/:id_shed', method='any')
 def edit_item(id_shed):
     try:
-        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret')[0])
+        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
         if check_session(rqstSession) is True:
             if request.forms.get('save','').strip():
                 id_shed = request.forms.get('id_shed','').strip()
                 state = request.forms.get('state','').strip()
                 time = request.forms.get('time','').strip()
             
-                conn_string = prop('database')[0]
+                conn_string = prop('database')
                 conn = psycopg2.connect(conn_string)
                 cursor = conn.cursor()
                 sql =   """
@@ -82,9 +86,13 @@ def edit_item(id_shed):
                         """
                 cursor.execute(sql, {'time':time, 'state':state, 'id_shed':id_shed})
                 conn.commit()
-                redirect('/getschedule')
+                return """Schedule updated <br>
+                        <form method="post" action="/getschedule">
+                        <button type="submit">Schedule</button>
+                        </form>
+                        """
             else:
-                conn_string = prop('database')[0]
+                conn_string = prop('database')
                 conn = psycopg2.connect(conn_string)
                 cursor = conn.cursor()
                 sql =   """
@@ -96,7 +104,7 @@ def edit_item(id_shed):
                 return template('edit_schedule', old=cur_data, id_shed=id_shed)
         else:
             pysessionid = ''
-            response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret')[0], Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
+            response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
             redirect('/login')
     except Exception as e:
         logging.debug(e)
@@ -105,7 +113,7 @@ def edit_item(id_shed):
 @route('/newschedule', method='any')
 def new_schedule():
     try:
-        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret')[0])
+        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
         if check_session(rqstSession) is True:
             if request.forms.get('save','').strip():
                 day = request.forms.get('day', '').strip()
@@ -113,7 +121,7 @@ def new_schedule():
                 time = request.forms.get('time','').strip()
                 seq_dict={'MONDAY':1, 'TUESDAY':2, 'WEDNESDAY':3, 'THURSDAY':4, 'FRIDAY':5, 'SATURDAY':6, 'SUNDAY':7}
                 seq=seq_dict[day]
-                conn_string = prop('database')[0]
+                conn_string = prop('database')
                 conn = psycopg2.connect(conn_string)
                 cursor = conn.cursor()
                 
@@ -123,12 +131,16 @@ def new_schedule():
                 cursor.execute(sql, {'time':time, 'state':state, 'day':day, 'seq':seq})
                 conn.commit()
                 cursor.close()
-                redirect('/getschedule')
+                return """Schedule updated <br>
+                        <form method="post" action="/getschedule">
+                        <button type="submit">Schedule</button>
+                        </form>
+                        """
             else:
                 return template('new_schedule')
         else:
             pysessionid = ''
-            response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret')[0], Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
+            response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
             redirect('/login')
     except Exception as e:
         logging.debug(e)
@@ -137,7 +149,7 @@ def new_schedule():
 @route('/newuser', method='any')
 def new_user():
     try:
-        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret')[0])
+        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
         if check_session(rqstSession) is True:
             if request.forms.get('save','').strip():
                 userid = request.forms.get('userid', '').strip().upper()
@@ -147,7 +159,7 @@ def new_user():
                 if password is not '' and password == confpassword and userid is not '':
                     salt, hashed_password = hash_password(userid, salt)
                 
-                    conn_string = prop('database')[0]
+                    conn_string = prop('database')
                     conn = psycopg2.connect(conn_string)
                     cursor = conn.cursor()
                 
@@ -164,7 +176,7 @@ def new_user():
                 return template('newuser')
         else:
             pysessionid = ''
-            response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret')[0], Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
+            response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
             redirect('/login') 
     except Exception as e:
         logging.debug(e)
@@ -174,10 +186,11 @@ def new_user():
 def error404(error):
     return 'Nothing here, sorry'
 
-###########
+##########
 
 
 
+host = prop('host')
+port = prop('port')
 
-
-run(host='192.168.0.5', port=99, debug=True)
+run(host=host, port=port, debug=True)
