@@ -6,7 +6,7 @@ import logging
 def switch_boiler(shed_state):
     
     try:
-        conn_string = prop('database')[0]
+        conn_string = prop('database')
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         sql =   """

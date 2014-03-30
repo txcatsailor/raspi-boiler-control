@@ -8,14 +8,15 @@ from switch import switch_boiler
 from check_temp import check_temp
 
 def get_schedule():
-    
-    logFile = prop('logLocation')
-
-#    logging.basicConfig(format='%(asctime)s: %(message)s ',filename=logFile[0], filemode='a', level=logging.DEBUG)
-    logging.basicConfig(level=logging.DEBUG)
+    logtype = prop('logtype')
+    if logtype == 'file':
+        logFile = prop('loglocation')
+        logging.basicConfig(format='%(asctime)s: %(message)s ',filename=logFile, filemode='a', level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.DEBUG)
     
     #Define our connection string
-    conn_string = prop('database')[0]
+    conn_string = prop('database')
     
     logging.debug("Connecting to database ->%s" % (conn_string))
     

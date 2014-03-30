@@ -4,12 +4,16 @@ import datetime
 from datetime import timedelta
 from get_props import prop
 
+logtype = prop('logtype')
+if logtype == 'file':
+    logFile = prop('loglocation')
+    logging.basicConfig(format='%(asctime)s: %(message)s ',filename=logFile, filemode='a', level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.DEBUG)
 
 def check_override(id_shed):
-    
-    logging.basicConfig(level=logging.DEBUG)
-    
-    conn_string = prop('database')[0]    
+
+    conn_string = prop('database')  
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
 
@@ -35,13 +39,8 @@ def check_override(id_shed):
         return False
 
 def set_override():
-    
-    logFile = prop('logLocation')
-
-#    logging.basicConfig(format='%(asctime)s: %(message)s ',filename=logFile[0], filemode='a', level=logging.DEBUG)
-    logging.basicConfig(level=logging.DEBUG)
-    
-    conn_string = prop('database')[0]
+ 
+    conn_string = prop('database')
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     

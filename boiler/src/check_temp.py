@@ -3,7 +3,12 @@ from get_props import prop
 import logging
 
 def check_temp():
-    logging.basicConfig(level=logging.DEBUG)
+    logtype = prop('logtype')
+    if logtype == 'file':
+        logFile = prop('loglocation')
+        logging.basicConfig(format='%(asctime)s: %(message)s ',filename=logFile, filemode='a', level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.DEBUG)
     try: 
         f=open('/sys/bus/w1/devices/28-0000058cd8ae/w1_slave', 'r')
         for l in f:
@@ -34,9 +39,9 @@ def check_temp():
     logging.debug('Room Temp: %s, Radiator Temp: %s, Outside Temp: %s' % (roomTemp, radTemp, outsideTemp))
     
     try:
-        tolerance = int(prop('tolerance')[0])
+        tolerance = int(prop('tolerance'))
         
-        conn_string = prop('database')[0]
+        conn_string = prop('database')
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         
