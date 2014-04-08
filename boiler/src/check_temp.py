@@ -25,7 +25,7 @@ def check_temp():
         f.close()
     except Exception as e:
         logging.debug(e)
-     
+      
     try:
         f=open('/sys/bus/w1/devices/28-0000058e2b9c/w1_slave', 'r')
         for l in f:
@@ -35,6 +35,10 @@ def check_temp():
     except Exception as e:
         logging.debug(e)
          
+#     roomTemp = 15.375
+#     radTemp = 42.123
+#     outsideTemp = 8.123
+    
     
     logging.debug('Room Temp: %s, Radiator Temp: %s, Outside Temp: %s' % (roomTemp, radTemp, outsideTemp))
     
@@ -51,17 +55,24 @@ def check_temp():
         cursor.execute(sql)
         
         target_temp = cursor.fetchone()
-        
+        cursor.close()
+        try:
+            target_temp = target_temp[0]
+            logging.debug(target_temp)
+        except:
+            target_temp = None
+    
         if target_temp is None:
             logging.debug('No target temp set, setting default to 21')
             target_temp = 21
         
         upper = target_temp + tolerance
         lower = target_temp - tolerance
-        
-        if roomTemp in range(lower, upper):
+        logging.debug('lower = %s' % lower)
+        logging.debug('upper = %s' % upper)
+        if roomTemp >= lower and roomTemp <= upper:
             logging.debug('temp within range')
-            return True
+            return 'WITHIN'
         elif roomTemp >= upper:
             logging.debug('HIGH')
             return 'HIGH'

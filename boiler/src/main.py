@@ -25,7 +25,7 @@ def login():
 def main():
     try:
         rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
-        username = request.forms.get('username')
+        username = request.forms.get('username').upper()
         password = request.forms.get('password')
         if request.forms.get('override','').strip() is '':
             if check_password(password, username) is True:
@@ -152,9 +152,9 @@ def new_user():
         rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
         if check_session(rqstSession) is True:
             if request.forms.get('save','').strip():
-                userid = request.forms.get('userid', '').strip().upper()
-                password = request.forms.get('password','').strip()
-                confpassword = request.forms.get('confpassword','').strip()
+                userid = request.forms.get('userid', '').upper()
+                password = request.forms.get('password','')
+                confpassword = request.forms.get('confpassword','')
                 salt = '0'
                 if password is not '' and password == confpassword and userid is not '':
                     salt, hashed_password = hash_password(userid, salt)
@@ -177,7 +177,7 @@ def new_user():
         else:
             pysessionid = ''
             response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
-            redirect('/login') 
+            return template('main') 
     except Exception as e:
         logging.debug(e)
         return '<p>Error</p>'
