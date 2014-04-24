@@ -1,28 +1,68 @@
+
 import psycopg2
-import hashlib
-import uuid
+from passlib.hash import sha512_crypt
 from get_props import prop
 import logging
-from password import hash_password
+
+logtype = prop('logtype')
+if logtype == 'file':
+    logFile = prop('loglocation')
+    logging.basicConfig(format='%(asctime)s: %(message)s ',filename=logFile, filemode='a', level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.DEBUG)
+
+
+def get_password(userid):
+    userid = userid.upper()
+    logging.debug('get password for %s' % userid)
+    conn_string = prop('database')
+    conn = psycopg2.connect(conn_string)
+    cursor = conn.cursor()
+
+    sql =   """
+            select password from users where userid = %(userid)s
+            """
+    cursor.execute(sql, {'userid':userid})
+    row = cursor.fetchone()
+    if row is not None:
+        dbpassword = row[0]
+        logging.debug('db password hash %s' % dbpassword)
+        return dbpassword
+    else:
+        logging.debug('No details found for user')
+        return None
+
+def check_password(password, userid):
+    logging.debug('username/password to check is %s/%s' % (userid, password))
+    dbpassword = get_password(userid)
+    if dbpassword is not None:
+        if sha512_crypt.verify(password, dbpassword):
+            logging.debug('password correct')
+            return True
+        else:
+            logging.debug('password incorrect')
+            return False
+    else:
+        return False
+
+def hash_password(password):
+    userid = 'awatson'
+    logging.debug('hash password')
+    hashed_password = sha512_crypt.encrypt(password)
+    logging.debug('hashed password = %s' % hashed_password)
+      
+    conn_string = prop('database')
+    conn = psycopg2.connect(conn_string)
+    cursor = conn.cursor()
+    
+    sql =   """
+            insert into users (id_usrr, userid, password) values (nextval('users_id_usrr_seq'), %(userid)s, %(password)s)
+            """
+    cursor.execute(sql, {'userid':userid, 'password':hashed_password})
+    conn.commit()
+    cursor.close()
 
 password = 'tuppence'
-salt = '1e2dfa5c10d8494781260083d09cc1e5'
-dbpassword='f92e1acd78d6cdb7266a21ab72967c1dbe834202e0bdcd9a09a4a5d3ce82cee5c64761c04a780d04b8c06c938c1a232fea9d411c1a2b2c5582c7507d6410e2cb'
-dbsalt = '1e2dfa5c10d8494781260083d09cc1e5'
-
-
-logging.debug('username/password to check is %s' % (password))
-if dbpassword is not None:
-    test = hash_password(password, dbsalt)
-    logging.debug('test password hash %s' % test)
-    if test == dbpassword:
-        logging.debug('password correct')
-        print('True')
-    else: 
-        logging.debug('password incorrect')
-        print('False')
-else:
-    print('False')
-
-    
-    #f92e1acd78d6cdb7266a21ab72967c1dbe834202e0bdcd9a09a4a5d3ce82cee5c64761c04a780d04b8c06c938c1a232fea9d411c1a2b2c5582c7507d6410e2cb
+#userid = 'SUZY'
+hash_password(password)
+#check_password(password, userid)
