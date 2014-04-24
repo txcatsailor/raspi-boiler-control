@@ -190,8 +190,8 @@ def error404(error):
 
 @route('<path:path>')
 def server_static(path):
-    static = prop()
-    return static_file(path, root='/usr/home/project/client')
+    static = prop('static')
+    return static_file(path, root=static)
 ##########
 
 
