@@ -1,12 +1,13 @@
 [DEFAULT]
 
-logLocation = c:\boiler\boiler.log
-database = host='localhost' dbname='boiler' user='postgres' password='tuppence'
-sessionDir = c:\boiler\sessions\
+logLocation = /home/awatson/boiler/boiler.log
+database = host='192.168.0.112' dbname='boiler' user='postgres' password='tuppence123'
+sessionDir = /home/awatson/boiler/sessions/
 cookieSecret = kjdsh8678dfs65f7s5df76f7v65dsu78
 gpio = 15
 host = 192.168.0.5
 port = 99
+server = meinheld
 tolerance = 2
-logtype = 'screen'
-loopsleep = 10.00
+logtype = screen
+loopsleep = 15

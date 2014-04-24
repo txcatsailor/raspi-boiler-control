@@ -26,7 +26,9 @@ def main():
     try:
         rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
         username = request.forms.get('username').upper()
-        password = request.forms.get('password')
+        password = request.forms.get('password').strip()
+        logging.debug(password)
+        logging.debug(type(password))
         if request.forms.get('override','').strip() is '':
             if check_password(password, username) is True:
                 set_session(rqstSession)            
@@ -153,20 +155,20 @@ def new_user():
         if check_session(rqstSession) is True:
             if request.forms.get('save','').strip():
                 userid = request.forms.get('userid', '').upper()
-                password = request.forms.get('password','')
-                confpassword = request.forms.get('confpassword','')
-                salt = '0'
+                password = request.forms.get('password').strip()
+                confpassword = request.forms.get('confpassword').strip()
+                logging.debug('new user password = %s' % password)
                 if password is not '' and password == confpassword and userid is not '':
-                    salt, hashed_password = hash_password(userid, salt)
+                    hashed_password = hash_password(password)
                 
                     conn_string = prop('database')
                     conn = psycopg2.connect(conn_string)
                     cursor = conn.cursor()
                 
                     sql =   """
-                            insert into users (id_usrr, userid, password, salt) values (nextval('users_id_usrr_seq'), %(userid)s, %(password)s, %(salt)s)
+                            insert into users (id_usrr, userid, password) values (nextval('users_id_usrr_seq'), %(userid)s, %(password)s)
                             """
-                    cursor.execute(sql, {'userid':userid, 'password':hashed_password, 'salt':salt})
+                    cursor.execute(sql, {'userid':userid, 'password':hashed_password})
                     conn.commit()
                     cursor.close()
         
@@ -186,6 +188,10 @@ def new_user():
 def error404(error):
     return 'Nothing here, sorry'
 
+@route('<path:path>')
+def server_static(path):
+    static = prop()
+    return static_file(path, root='/usr/home/project/client')
 ##########
 
 
