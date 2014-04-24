@@ -11,3 +11,4 @@ server = meinheld
 tolerance = 2
 logtype = screen
 loopsleep = 15
+static = /home/awatson/boiler/bootstrap-3.1.1-dist
