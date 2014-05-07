@@ -18,20 +18,22 @@
   </head>
   <body>
     	<h1>Boiler Control</h1>
-	<form method="post" action="/newuser">
-		<div class="btn-group">
+	<div class="btn-group">
+		<form method="post" action="/newuser">
 			<button type="submit" class="btn btn-default">New User</button>
- 		</div>
- 	</form>
-		<div class="btn-group">
-			<button type="submit" class="btn btn-default" method="post" action="/main">Set Schedule</button>
-		</div>
-	<form method="post" action="/main">
- 		<div class="btn-group">
+ 		</form>
+ 	</div>
+	<div class="btn-group">
+		<form method="post" action="/getschedule">
+			<button type="submit" class="btn btn-default">Set Schedule</button>
+		</form>
+	</div>
+	<div class="btn-group">
+		<form method="post" action="/main">
  			<button type="submit" class="btn btn-default" name="override">Override</button>
- 		</div>
-	</form>
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+ 		</form>
+ 	</div>
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>

@@ -1,5 +1,5 @@
-from bottle import route, redirect, request, run, jinja2_template, \
-                    debug, static_file, response, template, error
+from bottle import route, redirect, request, run, \
+                     static_file, response, template, error
 from password import check_password
 from get_props import prop
 from session import get_sessionid, set_session, check_session
