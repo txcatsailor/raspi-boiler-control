@@ -19,29 +19,11 @@
   <body>
     <h1>Boiler Schedule</h1>
 <div style="padding:0 19px">
-	<form class="form-inline" role="form" action="/newschedule" method="POST">
-		<div class="form-group">
-			<select class="form-control" name="day">
-				<option value="MONDAY">Monday
-				<option value="TUESDAY">Tuesday
-				<option value="WEDNESDAY">Wednesday
-				<option value="THURSDAY">Thursday
-				<option value="FRIDAY">Friday
-				<option value="SATURDAY">Saturday
-				<option value="SUNDAY">Sunday	
-			</select>
-		</div>
-		<div class="form-group">	
-			<input type="text" name="time" class="form-control" placeholder ="HH:MM:SS">
-		</div>
-		<div class="form-group">
-			<select class="form-control" name="state" >
-				<option value="ON">On
-				<option value="OFF">Off
-			</select>
-		</div>
-		<button type="submit" name="save" value="save"class="btn btn-default">Save</button>
+Schedule update successful
+	<form method="post" action="/getschedule">
+		<button type="submit" class="btn btn-default">Schedule</button>
 	</form>
+
 </div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
