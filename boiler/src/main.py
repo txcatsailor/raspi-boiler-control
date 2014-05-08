@@ -70,7 +70,7 @@ def get_schedule():
 
 
 
-@route('/edit/:id_shed', method='any')
+@route('/edit/<id_shed>')
 def edit_item(id_shed):
     try:
         rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
@@ -133,11 +133,7 @@ def new_schedule():
                 cursor.execute(sql, {'time':time, 'state':state, 'day':day, 'seq':seq})
                 conn.commit()
                 cursor.close()
-                return """Schedule updated <br>
-                        <form method="post" action="/getschedule">
-                        <button type="submit">Schedule</button>
-                        </form>
-                        """
+                return template('scheduleConf')
             else:
                 return template('new_schedule')
         else:
