@@ -17,29 +17,30 @@
     <![endif]-->
   </head>
   <body>
+    <div class="container">
     <h1>Boiler Schedule</h1>
-<div class="panel panel-default">
-  <!-- Default panel contents -->
-  <div class="panel-heading">Schedule</div>
-
-  <!-- Table -->
-  <table class="table">
-    %for row in rows:
-      %id_shed, day, time, state = row
-    <tr>
-    %for col in row:
-    <td>{{col}}</td>
-    %end
-    <td><a href="/edit/{{id_shed}}"> Edit</a></td>
-    </tr>
-    %end
-  </table>
-</div>
-<div class="btn-group">
-	<form method="post" action="/newschedule">
-		<button type="submit" class="btn btn-default">New</button>
- 	</form>
-</div>
+		<div class="panel panel-default">
+  			<div class="panel-heading">Schedule</div>
+			  <table class="table">
+			    %for row in rows:
+			      %id_shed, day, time, state = row
+			    <tr>
+			    %for col in row:
+			    <td>{{col}}</td>
+			    %end
+			    <td><a href="/edit/{{id_shed}}"> Edit</a></td>
+			    <td><a href="/getschedule?delete=true&id_shed={{id_shed}}"> Delete</a></td>
+			    </tr>
+			    %end
+			  </table>
+			</div>
+			<div class="btn-group">
+				<form method="post" action="/newschedule">
+					<button type="submit" class="btn btn-default">New</button>
+		 		</form>
+			</div>
+		</div>
+	</div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
