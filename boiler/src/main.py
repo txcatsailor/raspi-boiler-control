@@ -1,5 +1,5 @@
 from bottle import route, redirect, request, run, \
-                     static_file, response, template, error
+                     static_file, response, template, error, get
 from password import check_password
 from get_props import prop
 from session import get_sessionid, set_session, check_session
@@ -44,22 +44,38 @@ def main():
         logging.debug('exception in main: %s' % e)
         return '<p>Error</p>'
 
-@route('/getschedule', method='any')
+@route('/getschedule', method=['GET', 'POST'])
 def get_schedule():
     try:
         rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
         if check_session(rqstSession) is True:
-            conn_string = prop('database')
-            conn = psycopg2.connect(conn_string)
-            cursor = conn.cursor()
-            sql =   """
-                    select id_shed, day, time, state from schedule order by seq, time
-                    """
-            cursor.execute(sql)
-            result = cursor.fetchall()
-            cursor.close()
-            
-            return template('sched_table', rows=result)
+            try:
+                if request.query['delete']:
+                    id_shed = request.query['id_shed']
+                    conn_string = prop('database')
+                    conn = psycopg2.connect(conn_string)
+                    cursor = conn.cursor()
+                    sql =   """
+                            delete from schedule where id_shed = %(id_shed)s
+                            """
+                    cursor.execute(sql, {'id_shed':id_shed})
+                    conn.commit()
+                    cursor.close()
+                    
+                    return template('scheduleConf')
+                
+            except:    
+                conn_string = prop('database')
+                conn = psycopg2.connect(conn_string)
+                cursor = conn.cursor()
+                sql =   """
+                        select id_shed, day, time, state from schedule order by seq, time
+                        """
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                cursor.close()
+                
+                return template('sched_table', rows=result)
         else:
             pysessionid = ''
             response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
@@ -70,7 +86,7 @@ def get_schedule():
 
 
 
-@route('/edit/<id_shed>')
+@route('/edit/<id_shed>', method=['POST', 'GET'])
 def edit_item(id_shed):
     try:
         rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
@@ -88,11 +104,7 @@ def edit_item(id_shed):
                         """
                 cursor.execute(sql, {'time':time, 'state':state, 'id_shed':id_shed})
                 conn.commit()
-                return """Schedule updated <br>
-                        <form method="post" action="/getschedule">
-                        <button type="submit">Schedule</button>
-                        </form>
-                        """
+                return template('scheduleConf')
             else:
                 conn_string = prop('database')
                 conn = psycopg2.connect(conn_string)
@@ -179,6 +191,11 @@ def new_user():
     except Exception as e:
         logging.debug(e)
         return '<p>Error</p>'
+
+@route('/settemp', method=['GET', 'POST'])
+def set_temp():
+    return template('set_temp')
+
     
 @error(404)
 def error404(error):
