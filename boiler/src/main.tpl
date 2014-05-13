@@ -31,7 +31,12 @@
 		</div>
 		<div class="btn-group">
 			<form method="post" action="/main">
-	 			<button type="submit" class="btn btn-default" name="override">Override</button>
+	 			<input type="submit" class="btn btn-default" name="override" value="override">
+	 		</form>
+	 	</div>
+	 	<div class="btn-group">
+			<form method="post" action="/settemp">
+	 			<button type="submit" class="btn btn-default" name="settemp">Set Temp</button>
 	 		</form>
 	 	</div>
 	 </div>
