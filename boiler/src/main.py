@@ -21,23 +21,31 @@ def login():
     response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), httponly=True)
     return template('login')
 
-@route('/main', method='POST')
+@route('/main', method=['POST', 'GET'])
 def main():
     try:
-        rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
-        username = request.forms.get('username').upper()
-        password = request.forms.get('password').strip()
-        logging.debug(password)
-        logging.debug(type(password))
-        if request.forms.get('override','').strip() is '':
+        try:
+            rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
+        except:
+            pass
+        if check_session(rqstSession) is True:
+            try:
+                if request.forms.get('override','').strip():
+                    logging.debug('override')
+                    set_override()
+                    return template('main')
+            except:
+                pass
+            return template('main')
+        elif request.forms.get('override','').strip() is '':
+            rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
+            username = request.forms.get('username').upper()
+            password = request.forms.get('password').strip()
+            logging.debug(password)
+            logging.debug(type(password))
             if check_password(password, username) is True:
                 set_session(rqstSession)            
-                return template('main')
-        elif check_session(rqstSession) is True:
-            if request.forms.get('override','').strip():
-                logging.debug('override')
-                set_override()
-                return template('main')            
+                return template('main')           
             else:
                 return template('login')
     except Exception as e:
@@ -160,42 +168,75 @@ def new_schedule():
 def new_user():
     try:
         rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
-        if check_session(rqstSession) is True:
-            if request.forms.get('save','').strip():
-                userid = request.forms.get('userid', '').upper()
-                password = request.forms.get('password').strip()
-                confpassword = request.forms.get('confpassword').strip()
-                logging.debug('new user password = %s' % password)
-                if password is not '' and password == confpassword and userid is not '':
-                    hashed_password = hash_password(password)
-                
-                    conn_string = prop('database')
-                    conn = psycopg2.connect(conn_string)
-                    cursor = conn.cursor()
-                
-                    sql =   """
-                            insert into users (id_usrr, userid, password) values (nextval('users_id_usrr_seq'), %(userid)s, %(password)s)
-                            """
-                    cursor.execute(sql, {'userid':userid, 'password':hashed_password})
-                    conn.commit()
-                    cursor.close()
-        
-                else:
-                    return template('newuser')
+    except:
+        pass
+    if check_session(rqstSession) is True:
+        if request.forms.get('save','').strip():
+            userid = request.forms.get('userid', '').upper()
+            password = request.forms.get('password').strip()
+            confpassword = request.forms.get('confpassword').strip()
+            logging.debug('new user password = %s' % password)
+            if password is not '' and password == confpassword and userid is not '':
+                hashed_password = hash_password(password)
+            
+                conn_string = prop('database')
+                conn = psycopg2.connect(conn_string)
+                cursor = conn.cursor()
+            
+                sql =   """
+                        insert into users (id_usrr, userid, password) values (nextval('users_id_usrr_seq'), %(userid)s, %(password)s)
+                        """
+                cursor.execute(sql, {'userid':userid, 'password':hashed_password})
+                conn.commit()
+                cursor.close()
+                redirect("/main")
+    
             else:
                 return template('newuser')
         else:
-            pysessionid = ''
-            response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
-            return template('main') 
-    except Exception as e:
-        logging.debug(e)
-        return '<p>Error</p>'
+            return template('newuser')
+    else:
+        pysessionid = ''
+        response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
+        return template('login') 
+
 
 @route('/settemp', method=['GET', 'POST'])
 def set_temp():
-    return template('set_temp')
-
+    rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
+    if check_session(rqstSession) is True:
+        if request.forms.get('save','').strip():
+            target_temp = request.forms.get('temp').strip()
+            logging.debug('target temp = %s' % target_temp)
+            conn_string = prop('database')
+            conn = psycopg2.connect(conn_string)
+            cursor = conn.cursor()
+        
+            sql =   """
+                    update target_temp set target_temp = %(target_temp)s
+                    """
+            cursor.execute(sql, {'target_temp':target_temp})
+            conn.commit()
+            cursor.close()
+            redirect("/main")
+        else:
+            logging.debug('set temp page')
+            conn_string = prop('database')
+            conn = psycopg2.connect(conn_string)
+            cursor = conn.cursor()
+        
+            sql =   """
+                    select target_temp from target_temp
+                    """
+            cursor.execute(sql)
+            curr_temp = cursor.fetchone()
+            logging.debug('current target temp = %s' % curr_temp)
+            cursor.close()
+            return template('set_temp', curr_temp=curr_temp)
+    else:
+        pysessionid = ''
+        response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
+        return template('main')
     
 @error(404)
 def error404(error):
