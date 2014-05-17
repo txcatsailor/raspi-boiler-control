@@ -1,5 +1,5 @@
 from bottle import route, redirect, request, run, \
-                     static_file, response, template, error, get
+                     static_file, response, template, error
 from password import check_password
 from get_props import prop
 from session import get_sessionid, set_session, check_session
@@ -58,32 +58,85 @@ def get_schedule():
         rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
         if check_session(rqstSession) is True:
             try:
-                if request.query['delete']:
-                    id_shed = request.query['id_shed']
-                    conn_string = prop('database')
-                    conn = psycopg2.connect(conn_string)
-                    cursor = conn.cursor()
-                    sql =   """
-                            delete from schedule where id_shed = %(id_shed)s
-                            """
-                    cursor.execute(sql, {'id_shed':id_shed})
-                    conn.commit()
-                    cursor.close()
-                    
-                    return template('scheduleConf')
-                
-            except:    
+                delete = request.query['delete']
+            except:
+                delete = False
+            try:
+                select = request.forms.get('select')
+            except:
+                select = None
+            if delete is not False:
+                id_shed = request.query['id_shed']
                 conn_string = prop('database')
                 conn = psycopg2.connect(conn_string)
                 cursor = conn.cursor()
                 sql =   """
-                        select id_shed, day, time, state from schedule order by seq, time
+                        delete from schedule where id_shed = %(id_shed)s
+                        """
+                cursor.execute(sql, {'id_shed':id_shed})
+                conn.commit()
+                cursor.close()
+                
+                return template('scheduleConf')
+            
+            elif select is not None:
+                tmpl = request.forms.get('tmpl')
+                conn_string = prop('database')
+                conn = psycopg2.connect(conn_string)
+                cursor = conn.cursor()
+                sql =   """
+                        select s.id_shed, s.day, s.time, s.state, t.template_name 
+                        from schedule s join template t on (s.id_tmpl = t.id_tmpl) 
+                        where t.template_name = %(tmpl)s  order by s.seq, s.time
+                        """
+                cursor.execute(sql, {'tmpl':tmpl})
+                result = cursor.fetchall()
+                
+                sql =   """
+                        update template set selected = 'N'
+                        """
+                cursor.execute(sql)
+                conn.commit()
+                sql =   """
+                        update template set selected = 'Y' where template_name = %(tmpl)s
+                        """
+                cursor.execute(sql, {'tmpl':tmpl})
+                conn.commit()
+                sql =   """
+                        select template_name, (select count(1) from template) as count from template
+                        """
+                cursor.execute(sql)
+                rows = cursor.fetchall()
+                cursor.close()
+                tmpl = []
+                for row in rows:
+                    count = row[1]
+                    tmpl.append(row[0])
+                
+                return template('sched_table', rows=result, tmpl=tmpl, count=count)                
+
+            else:
+                conn_string = prop('database')
+                conn = psycopg2.connect(conn_string)
+                cursor = conn.cursor()
+                sql =   """
+                        select s.id_shed, s.day, s.time, s.state, t.template_name from schedule s join template t on (s.id_tmpl = t.id_tmpl) where t.selected = 'Y'  order by seq, time
                         """
                 cursor.execute(sql)
                 result = cursor.fetchall()
-                cursor.close()
                 
-                return template('sched_table', rows=result)
+                sql =   """
+                        select template_name, (select count(1) from template) as count from template
+                        """
+                cursor.execute(sql)
+                rows = cursor.fetchall()
+                cursor.close()
+                tmpl = []
+                for row in rows:
+                    count = row[1]
+                    tmpl.append(row[0])
+                
+                return template('sched_table', rows=result, tmpl=tmpl, count=count)
         else:
             pysessionid = ''
             response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
@@ -141,6 +194,7 @@ def new_schedule():
                 day = request.forms.get('day', '').strip()
                 state = request.forms.get('state','').strip()
                 time = request.forms.get('time','').strip()
+                tmpl = request.forms.get('tmpl','').strip()
                 seq_dict={'MONDAY':1, 'TUESDAY':2, 'WEDNESDAY':3, 'THURSDAY':4, 'FRIDAY':5, 'SATURDAY':6, 'SUNDAY':7}
                 seq=seq_dict[day]
                 conn_string = prop('database')
@@ -148,14 +202,26 @@ def new_schedule():
                 cursor = conn.cursor()
                 
                 sql =   """
-                        insert into schedule (id_shed, day, time, state, seq) values (nextval('schedule_id_shed_seq'), %(day)s, %(time)s, %(state)s, %(seq)s)
+                        insert into schedule (id_shed, day, time, state, seq, id_tmpl) values (nextval('schedule_id_shed_seq'), %(day)s, %(time)s, %(state)s, %(seq)s, (select id_tmpl from template where template_name = %(tmpl)s))
                         """
-                cursor.execute(sql, {'time':time, 'state':state, 'day':day, 'seq':seq})
+                cursor.execute(sql, {'time':time, 'state':state, 'day':day, 'seq':seq, 'tmpl':tmpl})
                 conn.commit()
                 cursor.close()
                 return template('scheduleConf')
             else:
-                return template('new_schedule')
+                conn_string = prop('database')
+                conn = psycopg2.connect(conn_string)
+                cursor = conn.cursor()
+                sql =   """
+                        select template_name from template
+                        """
+                cursor.execute(sql)
+                rows = cursor.fetchall()
+                cursor.close()
+                tmpl = []
+                for row in rows:
+                    tmpl.append(row[0])
+                return template('new_schedule', tmpl=tmpl)
         else:
             pysessionid = ''
             response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
@@ -237,6 +303,31 @@ def set_temp():
         pysessionid = ''
         response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
         return template('main')
+
+@route('/newtemplate', method=['GET', 'POST'])
+def new_template():
+    rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
+    if check_session(rqstSession) is True:
+        if request.forms.get('save','').strip():
+            name = request.forms.get('name').strip()
+            conn_string = prop('database')
+            conn = psycopg2.connect(conn_string)
+            cursor = conn.cursor()
+        
+            sql =   """
+                    insert into template (id_tmpl, template_name) values (nextval('template_id_tmpl_seq'), %(name)s)
+                    """
+            cursor.execute(sql, {'name':name})
+            conn.commit()
+            cursor.close()
+            return template('new_template')
+        else:
+            return template('new_template')
+    else:
+        pysessionid = ''
+        response.set_cookie('pysessionid', pysessionid, secret=prop('cookieSecret'), Expires='Thu, 01-Jan-1970 00:00:10 GMT', httponly=True)
+        return template('main')
+
     
 @error(404)
 def error404(error):
