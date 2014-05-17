@@ -19,33 +19,10 @@
  <body>
 	<div class="container">
 		<h1>Boiler Schedule</h1>
-		<form class="form-inline" role="form" action="/newschedule" method="POST">
-			<div class="form-group">
-				<select class="form-control" name="day">
-					<option value="MONDAY">Monday
-					<option value="TUESDAY">Tuesday
-					<option value="WEDNESDAY">Wednesday
-					<option value="THURSDAY">Thursday
-					<option value="FRIDAY">Friday
-					<option value="SATURDAY">Saturday
-					<option value="SUNDAY">Sunday	
-				</select>
-			</div>
+		<h3>New Template</h3>
+		<form class="form-inline" role="form" action="/newtemplate" method="POST">
 			<div class="form-group">	
-				<input type="text" name="time" class="form-control" placeholder ="HH:MM:SS">
-			</div>
-			<div class="form-group">
-				<select class="form-control" name="state" >
-					<option value="ON">On
-					<option value="OFF">Off
-				</select>
-			</div>
-			<div class="form-group">
-			    <select class="form-control" name="tmpl">
-			        %for item in tmpl: 
-			        <option value="{{item}}">{{item}}
-			        %end
-			    </select>
+				<input type="text" name="name" class="form-control" placeholder ="Template Name">
 			</div>
 			<button type="submit" name="save" value="save" class="btn btn-default">Save</button>
 		</form>

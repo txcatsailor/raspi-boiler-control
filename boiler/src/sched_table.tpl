@@ -19,11 +19,23 @@
   <body>
     <div class="container">
     <h1>Boiler Schedule</h1>
-		<div class="panel panel-default">
+    
+    <h3>Template</h3>
+    	<form class="form-inline" role="form" action="/getschedule" method="POST">
+			<div class="form-group">
+			    <select class="form-control" name="tmpl">
+			        %for item in tmpl: 
+			        <option value="{{item}}">{{item}}
+			        %end
+			    </select>
+			</div>
+			<button type="submit" name="select" value="select" class="btn btn-default">Select</button>
+		</form>
+		<div class="panel panel-default">	
   			<div class="panel-heading">Schedule</div>
 			  <table class="table">
 			    %for row in rows:
-			      %id_shed, day, time, state = row
+			      %id_shed, day, time, state, template_name = row
 			    <tr>
 			    %for col in row:
 			    <td>{{col}}</td>
@@ -37,6 +49,12 @@
 			<div class="btn-group">
 				<form method="post" action="/newschedule">
 					<button type="submit" class="btn btn-default">New</button>
+		 		</form>
+		 		<form method="post" action="/newtemplate">
+					<button type="submit" class="btn btn-default">New Template</button>
+		 		</form>
+		 		<form method="post" action="/main">
+					<button type="submit" class="btn btn-default">Back</button>
 		 		</form>
 			</div>
 		</div>
