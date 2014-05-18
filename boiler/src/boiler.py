@@ -8,25 +8,22 @@ from override import check_override
 from switch import switch_boiler
 from check_temp import check_temp
 
+logtype = prop('logtype')
+if logtype == 'file':
+    logFile = prop('loglocation')
+    logging.basicConfig(format='%(asctime)s: %(message)s ',filename=logFile, filemode='a', level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.DEBUG)
+
 def get_schedule():
     while True:
-        logtype = prop('logtype')
-        if logtype == 'file':
-            logFile = prop('loglocation')
-            logging.basicConfig(format='%(asctime)s: %(message)s ',filename=logFile, filemode='a', level=logging.DEBUG)
-        else:
-            logging.basicConfig(level=logging.DEBUG)
-        
-        #Define our connection string
         conn_string = prop('database')
         
         logging.debug("Connecting to database ->%s" % (conn_string))
         
         try:
-            # get a connection, if a connect cannot be made an exception will be raised here
             conn = psycopg2.connect(conn_string)
             cursor = conn.cursor()
-            logging.debug("Connected!")
         except Exception as e:
             logging.debug("failed to connect to database -> %s" (e))
         
@@ -41,7 +38,13 @@ def get_schedule():
             
             #get schedule rows from database
             sql = """
-                  select id_shed, day, time, state from schedule where upper(day) = upper(%(day)s) and time <= %(curr_time)s order by time desc
+                  select s.id_shed, s.day, s.time, s.state 
+                  from schedule s 
+                  join template t on t.id_tmpl = s.id_tmpl 
+                  where upper(s.day) = upper(%(day)s) 
+                  and s.time <= %(curr_time)s 
+                  and t.selected = 'Y'
+                  order by s.time desc
                   """
                     
             cursor.execute(sql, {'day':dayOfWeek, 'curr_time':time})
