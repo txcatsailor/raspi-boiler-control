@@ -32,6 +32,9 @@
 	    <br/>
   	    <button type="submit" name="save" value="save" class="btn btn-default">Save</button>
 	    </form>
+		<form action="/main">
+			<input type="submit" class ="btn btn-default" value="Back">
+		</form>    
     </div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>

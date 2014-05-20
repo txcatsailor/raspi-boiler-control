@@ -103,17 +103,16 @@ def get_schedule():
                 cursor.execute(sql, {'tmpl':tmpl})
                 conn.commit()
                 sql =   """
-                        select template_name, (select count(1) from template) as count from template
+                        select template_name from template
                         """
                 cursor.execute(sql)
                 rows = cursor.fetchall()
                 cursor.close()
                 tmpl = []
                 for row in rows:
-                    count = row[1]
                     tmpl.append(row[0])
                 
-                return template('sched_table', rows=result, tmpl=tmpl, count=count)                
+                return template('sched_table', rows=result, tmpl=tmpl)                
 
             else:
                 conn_string = prop('database')

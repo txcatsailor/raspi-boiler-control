@@ -81,6 +81,4 @@ def check_temp():
             return 'LOW'
            
     except Exception as e:
-        logging.debug(e)
-
-check_temp() 
+        logging.debug(e) 
