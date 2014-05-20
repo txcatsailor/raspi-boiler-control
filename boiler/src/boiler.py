@@ -92,15 +92,20 @@ def get_schedule():
             logging.debug('error in temp or override %s' % e)
         try:
             if shed_state == 'ON' and override == '0' and temp == 'LOW' and curr_state == 'OFF':
-                switch_boiler('ON')        
+                switch_boiler('ON')
+                logging.info('switching boiler on \n schedule state = on /n Override = false, temp =  low')        
             elif shed_state == 'OFF' and override == '1' and temp == 'LOW' and curr_state == 'OFF':
-                switch_boiler('ON')        
+                switch_boiler('ON')
+                logging.info('switching boiler on \n schedule state = off /n Override = true, temp =  low')
             else:
-                switch_boiler('OFF')               
+                switch_boiler('OFF')
+                logging.info('switching boiler off \n schedule state = %s /n Override = %s, temp =  %s' % (shed_state, override, temp))
             
         except Exception as e:
             logging.debug('error in switch section: %s' % e)
+        
         t = float(prop('loopsleep'))
         logging.debug('sleeping for = %s seconds' % t)
         TIME.sleep(t)
+
 get_schedule()
