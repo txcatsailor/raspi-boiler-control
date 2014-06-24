@@ -23,11 +23,16 @@
     <h3>Template</h3>
     	<form class="form-inline" role="form" action="/getschedule" method="POST">
 			<div class="form-group">
-			    <select class="form-control" name="tmpl">
+			    
+			    %template_name = rows[0]
+
+			    <select class="form-control" name="tmpl" value="{{template_name[4]}}">
 			        %for item in tmpl: 
 			        <option value="{{item}}">{{item}}
 			        %end
+			        
 			    </select>
+			    
 			</div>
 			<button type="submit" name="select" value="select" class="btn btn-default">Select</button>
 		</form>
@@ -63,5 +68,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/select.js"></script>
   </body>
 </html>
