@@ -6,7 +6,7 @@ import logging
 from get_props import prop
 from override import check_override
 from switch import switch_boiler
-from check_temp import check_temp
+import check_temp
 
 logtype = prop('logtype')
 if logtype == 'file':
@@ -81,7 +81,7 @@ def get_schedule():
             logging.debug(e)
             curr_state = 'OFF'
         try:
-            temp = check_temp()
+            temp = check_temp.temp('room').check_temp()
             logging.debug('temp is: %s' % temp)
             logging.debug('checking override')
             override = check_override(id_shed)
