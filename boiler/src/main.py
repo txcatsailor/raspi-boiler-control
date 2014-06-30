@@ -1,12 +1,13 @@
 from bottle import route, redirect, request, run, \
                      static_file, response, template, error
-from password import check_password
+
 from get_props import prop
 from session import get_sessionid, set_session, check_session
 import psycopg2
 from override import set_override
-from password import hash_password
+import auth
 import logging 
+import check_temp
 
 logtype = prop('logtype')
 if logtype == 'file':
@@ -30,22 +31,24 @@ def main():
             pass
         if check_session(rqstSession) is True:
             try:
+                roomTemp = check_temp.temp('room').get_temp()
+                radTemp = check_temp.temp('rad').get_temp()
+                outsideTemp = check_temp.temp('outside').get_temp()
                 if request.forms.get('override','').strip():
                     logging.debug('override')
                     set_override()
-                    return template('main')
+                    return template('main', roomTemp=roomTemp, radTemp=radTemp, outsideTemp=outsideTemp)
             except:
                 pass
-            return template('main')
+            return template('main', roomTemp=roomTemp, radTemp=radTemp, outsideTemp=outsideTemp)
         elif request.forms.get('override','').strip() is '':
             rqstSession = request.get_cookie('pysessionid', secret=prop('cookieSecret'))
             username = request.forms.get('username').upper()
             password = request.forms.get('password').strip()
             logging.debug(password)
-            logging.debug(type(password))
-            if check_password(password, username) is True:
+            if auth.passwd(username, password).check_password() == True:
                 set_session(rqstSession)            
-                return template('main')           
+                return template('main', roomTemp=roomTemp, radTemp=radTemp, outsideTemp=outsideTemp)           
             else:
                 return template('login')
     except Exception as e:
@@ -242,7 +245,7 @@ def new_user():
             confpassword = request.forms.get('confpassword').strip()
             logging.debug('new user password = %s' % password)
             if password is not '' and password == confpassword and userid is not '':
-                hashed_password = hash_password(password)
+                hashed_password = auth.passwd(userid, password).hash_password()
             
                 conn_string = prop('database')
                 conn = psycopg2.connect(conn_string)

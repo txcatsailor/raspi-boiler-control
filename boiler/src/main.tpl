@@ -39,11 +39,10 @@
 	 			<button type="submit" class="btn btn-default" name="settemp">Set Temp</button>
 	 		</form>
 	 	</div>
-	 <br>
-	 Current Temp:<br> 
-	 Room {temp}<br>
-	 Radiator {Rad}<br>
-	 Outside {outside}
+		<h3>Current Temp:</h3> 
+	 	Room {{roomTemp}}<br>
+	 	Radiator {{radTemp}}<br>
+	 	Outside {{outsideTemp}}
 	 </div>
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
