@@ -14,55 +14,55 @@ else:
 
 def get_password(userid):
     userid = userid.upper()
-    logging.debug('get password for %s' % userid)
+    logging.debug('get auth for %s' % userid)
     conn_string = prop('database')
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
 
     sql =   """
-            select password from users where userid = %(userid)s
+            select auth from users where userid = %(userid)s
             """
     cursor.execute(sql, {'userid':userid})
     row = cursor.fetchone()
     if row is not None:
         dbpassword = row[0]
-        logging.debug('db password hash %s' % dbpassword)
+        logging.debug('db auth hash %s' % dbpassword)
         return dbpassword
     else:
         logging.debug('No details found for user')
         return None
 
 def check_password(password, userid):
-    logging.debug('username/password to check is %s/%s' % (userid, password))
+    logging.debug('username/auth to check is %s/%s' % (userid, password))
     dbpassword = get_password(userid)
     if dbpassword is not None:
         if sha512_crypt.verify(password, dbpassword):
-            logging.debug('password correct')
+            logging.debug('auth correct')
             return True
         else:
-            logging.debug('password incorrect')
+            logging.debug('auth incorrect')
             return False
     else:
         return False
 
 def hash_password(password):
     userid = 'awatson'
-    logging.debug('hash password')
+    logging.debug('hash auth')
     hashed_password = sha512_crypt.encrypt(password)
-    logging.debug('hashed password = %s' % hashed_password)
+    logging.debug('hashed auth = %s' % hashed_password)
       
     conn_string = prop('database')
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     
     sql =   """
-            insert into users (id_usrr, userid, password) values (nextval('users_id_usrr_seq'), %(userid)s, %(password)s)
+            insert into users (id_usrr, userid, auth) values (nextval('users_id_usrr_seq'), %(userid)s, %(auth)s)
             """
-    cursor.execute(sql, {'userid':userid, 'password':hashed_password})
+    cursor.execute(sql, {'userid':userid, 'auth':hashed_password})
     conn.commit()
     cursor.close()
 
 password = 'tuppence'
 #userid = 'SUZY'
 hash_password(password)
-#check_password(password, userid)
+#check_password(auth, userid)

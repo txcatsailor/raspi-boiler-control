@@ -10,5 +10,8 @@
 <path>/usr/local/bin</path>
 <path>/usr/local/lib/python3.4/dist-packages</path>
 <path>/usr/local/lib/python3.4/dist-packages/psycopg2</path>
+<path>/usr/local/lib/python3.3/dist-packages</path>
+<path>/usr/local/lib/python3.3/dist-packages/passlib-1.6.2.egg-info</path>
+<path>/usr/local/lib/python3.3/dist-packages/passlib</path>
 </pydev_pathproperty>
 </pydev_project>
